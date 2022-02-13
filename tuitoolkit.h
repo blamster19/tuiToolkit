@@ -2,9 +2,20 @@
 #ifndef tuitoolkit_h
 #define tuitoolkit_h
 
+#include <ncurses.h>
+
 /*
 tuiToolkit - small TUI widget library
 
+
+
+HOW TO USE
+
+To make a window cuse tuiWindow type and then initiate it with tuiInitScreen function by passing a pointer:
+```
+	tuiWindow example;
+	tuiInitWindow(&example, x, y, width, height, title, decorations, colorpalette);
+```
 
 tuiWindow data structure:
 	variables:
@@ -25,10 +36,13 @@ tuiWindow data structure:
 							7 - all decorations
 			
 	0			palette   - color palette:
-								[background][foreground]
+								[fill]       [elements]
 							0 - light		 blue
 							1 - light		 green
 							2 - light		 red
+							3 - dark         blue
+							4 - dark         green
+							5 - dark         red
 
 int tuiInitWindow:
 	return values:
@@ -36,6 +50,9 @@ int tuiInitWindow:
 		1 - terminal has no color support
 		2 - invalid color palette
 */
+
+#define TUI_ERR_INVALID_ARGUMENT  1
+#define TUI_ERR_BAD_TERMINAL      2
 
 /* window elements */
 //label
@@ -64,19 +81,18 @@ typedef struct {
 	char decoration;
 	char palette;
 
-	char windowBuffer[width*height+1] = {0};
-	char windowColorMode;//stores 1 if terminal is capable of printing colored output
+	WINDOW *wndPtr;
 }tuiWindow;
 
 //window init macro
-#define initWindow(wnd) tuiWindow wnd = {.posX = 0, .posY = 0, .width = 30, .height = 15, .title = "window", .decoration = 7, .palette = 0}
+//#define initWindow(wnd) tuiWindow wnd = {.posX = 0, .posY = 0, .width = 30, .height = 15, .title = "window", .decoration = 7, .palette = 0}
 
 //initiate window
-int tuiInitWindow(struct tuiWindow window);
+int tuiInitWindow(tuiWindow *tWnd, unsigned int posX, unsigned int posY, unsigned int wdt, unsigned int hgt, char *title, char decor, char palt);
 //draw window on screen
-void tuiDrawWindow(struct tuiWindow window);
+void tuiDrawWindow(tuiWindow *tWnd);
 //end window
-void tuiEndWindow(struct tuiWindow window);
+void tuiEndWindow(tuiWindow *tWnd);
 
 /* screens */
 //screen struct
@@ -87,12 +103,12 @@ typedef struct {
 }tuiScreen;
 
 //init screen macro
-#define initScreen(scr, wdth, hght) tuiScreen scr = {.screenWidth = wdth, .screenHeight = hght, .focusedWindow = 0}
+//#define initScreen(scr, wdth, hght) tuiScreen scr = {.screenWidth = wdth, .screenHeight = hght, .focusedWindow = 0}
 
 //initiate screen
-int tui
+int tuiInitScreen();
 //end screen
-void tuiScreenEnd();
+void tuiEndScreen();
 
 
 #endif
