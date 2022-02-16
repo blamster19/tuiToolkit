@@ -136,13 +136,18 @@ void _drawList(tuiWidgetList *tWdg){
 	//if selection is outside the scope, scroll
 	if((tWdg -> selection) > (tWdg -> height - 2))
 		offset = (tWdg -> selection) - (tWdg -> height - 2);
+	//draw values
 	for(int i = 0; i < (tWdg -> height - 2); i++){
 		//frame
 		mvwprintw((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY + i + 1, tWdg -> posX, "|");
 		//options / empty field
 		if(((tWdg -> listLength) - 1) >= (i + offset)){//if there is some text
 			//set color
-			if((i+offset) == (tWdg -> selection))
+			// normal selection
+			if((i + offset) == (tWdg -> selection))
+				wattron((tWdg -> tWndPtr) -> wndPtr, COLOR_PAIR(_returnPalette(tWdg -> tWndPtr, 1)));		
+			//	if needs to be scrolled
+			if(((tWdg -> selection) > (tWdg -> height - 2)) && ((i - 1) == (tWdg -> height - 2)))
 				wattron((tWdg -> tWndPtr) -> wndPtr, COLOR_PAIR(_returnPalette(tWdg -> tWndPtr, 1)));		
 			//set text and truncate if necessary
 			if(_returnLength((*tWdg -> values)[i + offset]) < ((tWdg -> width) - 2)){//if the value is shorter than width
