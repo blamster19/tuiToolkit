@@ -105,6 +105,20 @@ typedef struct {
 	//pointer to parent window
 	tuiWindow *tWndPtr;
 }tuiWidgetCheckbox;
+//scrollable list
+typedef struct {
+	int posX;
+	int posY;
+	unsigned int selection;
+	unsigned int scroll;
+	char *(*values)[];// pointer to the array of values
+	unsigned int listLength;
+	char highlighted;
+	unsigned int width;
+	unsigned int height;
+	//pointer to parent window
+	tuiWindow *tWndPtr;
+}tuiWidgetList;
 //dropdown
 typedef struct {
 	int posX;
@@ -113,6 +127,7 @@ typedef struct {
 	char *(*values)[];//'values' won't store the list of values, only pointer
 	char highlighted;
 	char dropped;
+	unsigned int maxLength;
 	//pointer to parent window
 	tuiWindow *tWndPtr;
 }tuiWidgetDropdown;
@@ -122,7 +137,11 @@ typedef struct {
 void tuiInitLabel(tuiWindow *tWnd, tuiWidgetLabel *tLabl, unsigned int posX, unsigned int posY, char *label);
 void tuiInitButton(tuiWindow *tWnd, tuiWidgetButton *tButton, unsigned int posX, unsigned int posY, char *label);
 void tuiInitCheckbox(tuiWindow *tWnd, tuiWidgetCheckbox *tButton, unsigned int posX, unsigned int posY, char *label);
-void tuiInitDropdown(tuiWindow *tWnd, tuiWidgetDropdown *tDropdown, unsigned int posX, unsigned int posY, char *(*values)[]);
+void tuiInitList(tuiWindow *tWnd, tuiWidgetList *tList, unsigned int listLength, unsigned int posX, unsigned int posY, char *(*values)[], unsigned int width, unsigned int height);
+
+/*
+void tuiInitDropdown(tuiWindow *tWnd, tuiWidgetDropdown *tDropdown, unsigned int posX, unsigned int posY, char *(*values)[], unsigned int mLen);
+*/
 
 
 /* draw widget */
@@ -130,7 +149,8 @@ void tuiInitDropdown(tuiWindow *tWnd, tuiWidgetDropdown *tDropdown, unsigned int
 void _drawLabel(tuiWidgetLabel *tWdg);
 void _drawButton(tuiWidgetButton *tWdg);
 void _drawCheckbox(tuiWidgetCheckbox *tWdg);
-#define tuiDrawWidget(wdgt) _Generic (wdgt, tuiWidgetLabel*: _drawLabel, tuiWidgetButton*: _drawButton, tuiWidgetCheckbox*: _drawCheckbox)(wdgt)
+void _drawList(tuiWidgetList *tWdg);
+#define tuiDrawWidget(wdgt) _Generic (wdgt, tuiWidgetLabel*: _drawLabel, tuiWidgetButton*: _drawButton,tuiWidgetList*: _drawList, tuiWidgetCheckbox*: _drawCheckbox, tuiWidgetList: _drawList)(wdgt)
 //initiate window
 void tuiInitWindow(tuiWindow *tWnd, unsigned int posX, unsigned int posY, unsigned int wdt, unsigned int hgt, char *title, char decor, char palt, char set);
 //draw window on screen
