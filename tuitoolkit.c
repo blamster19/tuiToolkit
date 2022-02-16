@@ -126,23 +126,17 @@ void _drawCheckbox(tuiWidgetCheckbox *tWdg){
 	wrefresh((tWdg -> tWndPtr) -> wndPtr);
 }
 void _drawList(tuiWidgetList *tWdg){	
-	switch(tWdg -> highlighted){
-		case 0:
-			wattron((tWdg -> tWndPtr) -> wndPtr, COLOR_PAIR(_returnPalette(tWdg -> tWndPtr, 0)));
-			break;
-		case 1:
-			wattron((tWdg -> tWndPtr) -> wndPtr, COLOR_PAIR(_returnPalette(tWdg -> tWndPtr, 1)));
-			break;
-	}
 	//upper line
 	mvwprintw((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY, tWdg -> posX, "]");
 	mvwhline((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY, tWdg -> posX + 1, ACS_HLINE, tWdg -> width - 2);
 	mvwprintw((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY, tWdg -> posX + tWdg -> width - 1, "[");
 	//entries
 	char text[tWdg -> width];
-	unsigned int offset = tWdg -> scroll;
-	int i;
-	for(i = 0; i < (tWdg -> height - 2); i++){
+	unsigned int offset = 0;
+	//if selection is outside the scope, scroll
+	if((tWdg -> selection) > (tWdg -> height - 2))
+		offset = (tWdg -> selection) - (tWdg -> height - 2);
+	for(int i = 0; i < (tWdg -> height - 2); i++){
 		//frame
 		mvwprintw((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY + i + 1, tWdg -> posX, "|");
 		//options / empty field
