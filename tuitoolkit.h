@@ -2,7 +2,7 @@
 #ifndef tuitoolkit_h
 #define tuitoolkit_h
 
-//#include "tuitoolkit_internal.h"
+#include <stdlib.h>
 #include <ncurses.h>
 
 /*
@@ -55,6 +55,15 @@ int tuiInitWindow:
 
 #define TUI_ERR_INVALID_ARGUMENT  1
 #define TUI_ERR_BAD_TERMINAL      2
+#define TUI_ERR_OUT_OF_BOUNDS	  3
+#define TUI_ERR_CANT_ALLOCATE	  4
+
+//list node struct
+struct listNode{
+	void *data;
+	int dataType;
+	struct listNode *next;
+};
 
 //screen struct
 typedef struct {
@@ -75,6 +84,8 @@ typedef struct {
 	char extendedSet;
 	//ncurses window pointer
 	WINDOW *wndPtr;
+	//widget linked list head
+	struct listNode *wdgHead;
 }tuiWindow;
 
 /* widgets */
@@ -109,8 +120,8 @@ typedef struct {
 typedef struct {
 	int posX;
 	int posY;
-	unsigned int selection;
-	unsigned int scroll;
+	int selection;
+	int scroll;
 	char *(*values)[];// pointer to the array of values
 	unsigned int listLength;
 	char highlighted;
@@ -123,49 +134,35 @@ typedef struct {
 typedef struct {
 	int posX;
 	int posY;
-	unsigned int selection;
+	int selection;
 	char *(*values)[];//'values' won't store the list of values, only pointer
 	char highlighted;
 	char dropped;
-	unsigned int maxLength;
+	int maxLength;
 	//pointer to parent window
 	tuiWindow *tWndPtr;
 }tuiWidgetDropdown;
-//window init macro
-//#define initWindow(wnd) tuiWindow wnd = {.posX = 0, .posY = 0, .width = 30, .height = 15, .title = "window", .decoration = 7, .palette = 0}
 
 void tuiInitLabel(tuiWindow *tWnd, tuiWidgetLabel *tLabl, unsigned int posX, unsigned int posY, char *label);
 void tuiInitButton(tuiWindow *tWnd, tuiWidgetButton *tButton, unsigned int posX, unsigned int posY, char *label);
 void tuiInitCheckbox(tuiWindow *tWnd, tuiWidgetCheckbox *tButton, unsigned int posX, unsigned int posY, char *label);
-void tuiInitList(tuiWindow *tWnd, tuiWidgetList *tList, unsigned int listLength, unsigned int posX, unsigned int posY, char *(*values)[], unsigned int width, unsigned int height);
-
-/*
-void tuiInitDropdown(tuiWindow *tWnd, tuiWidgetDropdown *tDropdown, unsigned int posX, unsigned int posY, char *(*values)[], unsigned int mLen);
-*/
-
+void tuiInitList(tuiWindow *tWnd, tuiWidgetList *tList, int listLength, unsigned int posX, unsigned int posY, char *(*values)[], unsigned int width, unsigned int height);
 
 /* draw widget */
 
-void _drawLabel(tuiWidgetLabel *tWdg);
-void _drawButton(tuiWidgetButton *tWdg);
-void _drawCheckbox(tuiWidgetCheckbox *tWdg);
-void _drawList(tuiWidgetList *tWdg);
+int _drawLabel(tuiWidgetLabel *tWdg);
+int _drawButton(tuiWidgetButton *tWdg);
+int _drawCheckbox(tuiWidgetCheckbox *tWdg);
+int _drawList(tuiWidgetList *tWdg);
 #define tuiDrawWidget(wdgt) _Generic (wdgt, tuiWidgetLabel*: _drawLabel, tuiWidgetButton*: _drawButton,tuiWidgetList*: _drawList, tuiWidgetCheckbox*: _drawCheckbox, tuiWidgetList: _drawList)(wdgt)
 //initiate window
 void tuiInitWindow(tuiWindow *tWnd, unsigned int posX, unsigned int posY, unsigned int wdt, unsigned int hgt, char *title, char decor, char palt, char set);
 //draw window on screen
 void tuiDrawWindow(tuiWindow *tWnd);
-/*
-//move window
-void tuiMoveWindow(tuiWindow *tWnd, unsigned int posX, unsigned int posY);
-*/
 //end window
 void tuiEndWindow(tuiWindow *tWnd);
 
 /* screens */
-
-//init screen macro
-//#define initScreen(scr, wdth, hght) tuiScreen scr = {.screenWidth = wdth, .screenHeight = hght, .focusedWindow = 0}
 
 //initiate screen
 int tuiInitScreen();
