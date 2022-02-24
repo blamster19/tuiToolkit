@@ -13,7 +13,6 @@ int _returnLength(char *string){
 		t++;
 	return t;
 }
-
 //return palette number,; mode: 0 - fill, 1 - widget
 int _returnPalette(tuiWindow *tWnd, char mode){	
 	switch(mode){
@@ -53,7 +52,6 @@ int _returnPalette(tuiWindow *tWnd, char mode){
 			break;
 	}
 }
-
 //debug function
 void _drawERROR(tuiWindow *wnd, char *name, int errcode, unsigned int posX, unsigned int posY){		
 	switch(errcode){
@@ -72,90 +70,43 @@ void _drawERROR(tuiWindow *wnd, char *name, int errcode, unsigned int posX, unsi
 	}
 	wrefresh(wnd -> wndPtr);
 }
+//create new node of linked list
+void _appendToEnd(struct listNode** headerPtr, void *newData, int newDataType){
+	//allocate new node
+	struct listNode* newNode = malloc(sizeof(struct listNode));
+	newNode -> data = newData;
+	newNode -> dataType = newDataType;
+	newNode -> next = NULL;
+	//pointer to current last element
+	struct listNode *lastPtr = *headerPtr;
+	//if header is NULL, set it to point to  new node
+	if(*headerPtr == NULL){
+		*headerPtr = newNode;
+		return;
+	}
+	//else find the last node that points to NULL and set it to point to new node instead
+	while(lastPtr -> next != NULL)
+		lastPtr = lastPtr -> next;
+	lastPtr -> next = newNode;
+}
+
+/*    widgets    */
 
 void tuiInitLabel(tuiWindow *tWnd, tuiWidgetLabel *tLabel, unsigned int posX, unsigned int posY, char *label){
 	*tLabel = (tuiWidgetLabel){.posX = posX, .posY = posY, .text = label, .tWndPtr = tWnd};
-	//insert itself to widget list
-	struct listNode* iter;
-	iter = tWnd -> wdgHead;
-	while(iter != NULL){
-		iter = iter -> next;
-	}
-	struct listNode* newWdg =  malloc(sizeof(struct listNode));
-	if( newWdg == NULL){
-		_drawERROR(tWnd, "label widget", TUI_ERR_CANT_ALLOCATE, 0, 0);
-		return;
-	}
-	newWdg -> data = tLabel;
-	newWdg -> dataType = TYPE_LABEL;
-	newWdg -> next = NULL;
-	if(iter == NULL)
-		iter = newWdg;
-	else
-		iter -> next = newWdg;
+	_appendToEnd(&tWnd -> wdgHead, tLabel, TYPE_LABEL);
 }
 void tuiInitButton(tuiWindow *tWnd, tuiWidgetButton *tButton, unsigned int posX, unsigned int posY, char *label){
 	*tButton = (tuiWidgetButton){.posX = posX, .posY = posY, .text = label, .tWndPtr = tWnd, .highlighted = 0};
-	//insert itself to widget list
-	struct listNode* iter;
-	iter = tWnd -> wdgHead;
-	while(iter != NULL){
-		iter = iter -> next;
-	}
-	struct listNode* newWdg =  malloc(sizeof(struct listNode));
-	if( newWdg == NULL){
-		_drawERROR(tWnd, "button widget", TUI_ERR_CANT_ALLOCATE, 0, 0);
-		return;
-	}
-	newWdg -> data = tButton;
-	newWdg -> dataType = TYPE_BUTTON;
-	newWdg -> next = NULL;
-	if(iter == NULL)
-		iter = newWdg;
-	else
-		iter -> next = newWdg;
+	_appendToEnd(&tWnd -> wdgHead, tButton, TYPE_BUTTON);
 }
 void tuiInitCheckbox(tuiWindow *tWnd, tuiWidgetCheckbox *tCheckbox, unsigned int posX, unsigned int posY, char *label){
 	*tCheckbox = (tuiWidgetCheckbox){.posX = posX, .posY = posY, .text = label, .tWndPtr = tWnd, .highlighted = 0, .ticked = 0};
-	//insert itself to widget list
-	struct listNode* iter;
-	iter = tWnd -> wdgHead;
-	while(iter != NULL){
-		iter = iter -> next;
-	}
-	struct listNode* newWdg =  malloc(sizeof(struct listNode));
-	if( newWdg == NULL){
-		_drawERROR(tWnd, "checkbox widget", TUI_ERR_CANT_ALLOCATE, 0, 0);
-		return;
-	}
-	newWdg -> data = tCheckbox;
-	newWdg -> dataType = TYPE_CHECKBOX;
-	newWdg -> next = NULL;
-	if(iter == NULL)
-		iter = newWdg;
-	else
-		iter -> next = newWdg;
+	_appendToEnd(&tWnd -> wdgHead, tCheckbox, TYPE_CHECKBOX);
 }
 void tuiInitList(tuiWindow *tWnd, tuiWidgetList *tList, int listLength,  unsigned int posX, unsigned int posY, char *(*values)[], unsigned int width, unsigned int height){	
 	*tList = (tuiWidgetList){.posX = posX, .posY = posY, .values = values,.listLength = listLength, .tWndPtr = tWnd, .selection = 0, .scroll = 0, .highlighted = 0, .width = width, .height = height, .scroll = 0};
-	//insert itself to widget list
-	struct listNode* iter;
-	iter = tWnd -> wdgHead;
-	while(iter != NULL){
-		iter = iter -> next;
-	}
-	struct listNode* newWdg =  malloc(sizeof(struct listNode));
-	if( newWdg == NULL){
-		_drawERROR(tWnd, "list widget", TUI_ERR_CANT_ALLOCATE, 0, 0);
-		return;
-	}
-	newWdg -> data = tList;
-	newWdg -> dataType = TYPE_LIST;
-	newWdg -> next = NULL;
-	if(iter == NULL)
-		iter = newWdg;
-	else
-		iter -> next = newWdg;
+	_appendToEnd(&tWnd -> wdgHead, tList, TYPE_LIST);
 }
 
 int _drawLabel(tuiWidgetLabel *tWdg){		
@@ -167,7 +118,6 @@ int _drawLabel(tuiWidgetLabel *tWdg){
 	//print
 	wattron((tWdg -> tWndPtr) -> wndPtr, COLOR_PAIR(_returnPalette(tWdg -> tWndPtr, 0)));
 	mvwprintw((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY, tWdg -> posX, tWdg -> text);
-	wrefresh((tWdg -> tWndPtr) -> wndPtr);
 	return 0;
 }
 int _drawButton(tuiWidgetButton *tWdg){	
@@ -194,7 +144,6 @@ int _drawButton(tuiWidgetButton *tWdg){
 	mvwaddch((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY, tWdg -> posX, '<');
 	mvwprintw((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY, tWdg -> posX + 1, label);
 	mvwaddch((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY, tWdg -> posX + _returnLength(label) + 1, '>');
-	wrefresh((tWdg -> tWndPtr) -> wndPtr);
 	return 0;
 }
 int _drawCheckbox(tuiWidgetCheckbox *tWdg){	
@@ -225,7 +174,6 @@ int _drawCheckbox(tuiWidgetCheckbox *tWdg){
 	//label
 	wattron((tWdg -> tWndPtr) -> wndPtr, COLOR_PAIR(_returnPalette(tWdg -> tWndPtr, 0)));
 	mvwprintw((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY, tWdg -> posX + 4, label);
-	wrefresh((tWdg -> tWndPtr) -> wndPtr);
 	return 0;
 }
 int _drawList(tuiWidgetList *tWdg){	
@@ -289,7 +237,6 @@ int _drawList(tuiWidgetList *tWdg){
 	mvwaddch((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY + tWdg -> height - 1, tWdg -> posX, ACS_LLCORNER);
 	mvwhline((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY + tWdg -> height - 1, tWdg -> posX + 1, ACS_HLINE, tWdg -> width - 2);
 	mvwaddch((tWdg -> tWndPtr) -> wndPtr, tWdg -> posY + tWdg -> height - 1, tWdg -> posX + tWdg -> width - 1, ACS_LRCORNER);
-	wrefresh((tWdg -> tWndPtr) -> wndPtr);
 	return 0;
 }
 
@@ -303,11 +250,9 @@ void tuiInitWindow(tuiWindow *tWnd, unsigned int posX, unsigned int posY, unsign
 	//set keypad support
 	keypad(stdscr, TRUE);
 	*tWnd = (tuiWindow){.posX = posX, .posY = posY, .width = wdt, .height = hgt, .title = title, .decoration = decor, .palette = palt, .wndPtr = ncrsWnd, .extendedSet = set};
-	struct listNode* headNode = NULL;
-	headNode = (struct listNode*) malloc(sizeof(struct listNode));
-	tWnd -> wdgHead = headNode; 	
+	tWnd -> wdgHead = NULL;
 }
-
+#define tuiDrawWidget(wdgt) _Generic (wdgt, tuiWidgetLabel*: _drawLabel, tuiWidgetButton*: _drawButton,tuiWidgetList*: _drawList, tuiWidgetCheckbox*: _drawCheckbox, tuiWidgetList: _drawList)(wdgt)
 void tuiDrawWindow(tuiWindow *tWnd){
 	/* draw window body */
 	//set color palette
@@ -356,7 +301,6 @@ void tuiDrawWindow(tuiWindow *tWnd){
 				tuiDrawWidget( (tuiWidgetCheckbox*)wdgPtr -> data );
 				break;
 			case TYPE_LIST:
-				wprintw(tWnd -> wndPtr, "%s",  wdgPtr -> dataType);
 				tuiDrawWidget( (tuiWidgetList*)wdgPtr -> data );
 				break;
 			default:
@@ -366,7 +310,6 @@ void tuiDrawWindow(tuiWindow *tWnd){
 	}
 	wrefresh((*tWnd).wndPtr);
 }
-
 void tuiEndWindow(tuiWindow *tWnd){
 	endwin();
 }
@@ -390,7 +333,6 @@ int tuiInitScreen(){
 	refresh();
 	return 0;
 }
-
 void tuiEndScreen(){
 	endwin();
 }

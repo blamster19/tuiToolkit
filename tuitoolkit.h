@@ -9,48 +9,110 @@
 tuiToolkit - small TUI widget library
 
 
-
+---
 HOW TO USE
+---
 
-To make a window use tuiWindow type and then initiate it with tuiInitScreen function by passing a pointer:
+tuiToolkit currently relies on ncurses library for displaying the user interface in a terminal.
+To compile properly, you have to provide an appropriate compiler flag, for gcc it's -lncursesw
+Make sure you have libncurses5-dev installed on your system
+
+To begin working with the library, first initiate screen using function:
+```
+	tuiInitScreen();
+```
+
+To make a window use tuiWindow type and then initiate it with tuiInitScreen function by passing an address:
 ```
 	tuiWindow example;
 	tuiInitWindow(&example, x, y, width, height, title, decorations, colorpalette);
 ```
 
-tuiWindow data structure:
-	variables:
-	[default]   [name]      [description]
-	0			posX      - window x position from upper left corner measured in characters
-	0			posY      - window y position from upper left corner measured in characters
-	30			width     - window width measured in characters
-	15			height    - window height measured in characters
-	"window"	title     - title shown on the title bar
-	3			decoration - window decorations flag:
-							0 - no decorations
-							1 - frame only
-							2 - title only
-							3 - background only (no background - blank terminal color)
-							4 - frame + title
-							5 - frame + background
-							6 - background + title
-							7 - all decorations
+tuiWindow parameters:
+	[type]		   [name]      [description]
+	tuiWindow		tWnd  	   - window structure address
+	unsigned int	posX       - window x position from upper left corner measured in characters
+	unsigned int	posY       - window y position from upper left corner measured in characters
+	unsigned int	width      - window width measured in characters
+	unsigned int	height     - window height measured in characters
+	char*			title      - title shown on the title bar
+	char			decoration - window decorations flag:
+								 0 - no decorations
+								 1 - frame only
+								 2 - title only
+								 3 - background only (no background - blank terminal color)
+								 4 - frame + title
+								 5 - frame + background
+								 6 - background + title
+								 7 - all decorations
 			
-	0			palette   - color palette:
+	char			palette	   - color palette:
 								[fill]       [widgets]
-							0 - light		 blue
-							1 - light		 green
-							2 - light		 red
-							3 - dark         blue
-							4 - dark         green
-							5 - dark         red
+								 0 - light		 blue
+								 1 - light		 green
+								 2 - light		 red
+								 3 - dark        blue
+								 4 - dark        green
+								 5 - dark        red
+	char			extendedSet- use extended character set [UNIMPLEMENTED]	
+								 0 - off
+								 1 - on
 
-int tuiInitWindow:
-	return values:
+tuiWindow return values:
 		0 - window generated successfully
 		1 - terminal has no color support
 		2 - invalid color palette
 
+---
+
+To add a widget to the window create an instance of respective widget and initiate it using a function:
+```
+	tuiWidgetWIDGET instance;
+	tuiInitWIDGET(&example, &instance, ...);
+```
+where:
+	WIDGET - widget type:
+			Label 	 - plain single-line text
+			Button 	 - selectable and clickable button
+			Checkbox - selectable and settable checkbox
+			List 	 - scrollable list of selectable positions
+
+arguments of init functions:
+tuiInitLabel(Window, Widget, posX, posY, text)
+tuiInitButton(Window, Widget, posX, posY, text)
+tuiInitCheckbox(Window, Widget, posX, posY, text)
+tuiInitList(Window, Widget, posX, posY, list, width, height)
+
+parameters:
+	[type] 			[name] 		[description]
+	tuiWindow 		Window 		address of tuiWindow structure
+	/WIDGET/ 		Widget 		address of respective widget
+	unsigned int 	posX 		widget x position from upper left corner measured in characters
+	unsigned int 	posY 		widget Y  position from upper left corner measured in characters
+	*char 			text 		text to be displayed
+	*char[] 		list 		list of strings; each string is one selectable option
+	unsigned int 	width 		widget width measured in characters
+	unsigned int 	height 		widget height measured in characters
+
+where /WIDGET/ is one of the following types: tuiWidgetLabel, tuiWidgetButton, tuiWidgetCheckbox, tuiWidgetList
+---
+
+To print a window on screen use tuiDrawWindow:
+```
+	tuiDrawWindow(&example);
+```
+where &example is an address of the window structure
+
+To destroy window use tuiEndWindow:
+```
+	tuiEndWindow(&example);
+```
+where &example is an address of the window structure
+
+To end working with the library and safely exit ncurses use tuiEndScreen:
+```
+	tuiEndScreen();
+```
 */
 
 #define TUI_ERR_INVALID_ARGUMENT  1
@@ -81,7 +143,7 @@ typedef struct {
 	char *title;
 	char decoration;
 	char palette;
-	char extendedSet;
+	char extendedSet;//for later
 	//ncurses window pointer
 	WINDOW *wndPtr;
 	//widget linked list head
@@ -148,13 +210,6 @@ void tuiInitButton(tuiWindow *tWnd, tuiWidgetButton *tButton, unsigned int posX,
 void tuiInitCheckbox(tuiWindow *tWnd, tuiWidgetCheckbox *tButton, unsigned int posX, unsigned int posY, char *label);
 void tuiInitList(tuiWindow *tWnd, tuiWidgetList *tList, int listLength, unsigned int posX, unsigned int posY, char *(*values)[], unsigned int width, unsigned int height);
 
-/* draw widget */
-
-int _drawLabel(tuiWidgetLabel *tWdg);
-int _drawButton(tuiWidgetButton *tWdg);
-int _drawCheckbox(tuiWidgetCheckbox *tWdg);
-int _drawList(tuiWidgetList *tWdg);
-#define tuiDrawWidget(wdgt) _Generic (wdgt, tuiWidgetLabel*: _drawLabel, tuiWidgetButton*: _drawButton,tuiWidgetList*: _drawList, tuiWidgetCheckbox*: _drawCheckbox, tuiWidgetList: _drawList)(wdgt)
 //initiate window
 void tuiInitWindow(tuiWindow *tWnd, unsigned int posX, unsigned int posY, unsigned int wdt, unsigned int hgt, char *title, char decor, char palt, char set);
 //draw window on screen
@@ -168,7 +223,5 @@ void tuiEndWindow(tuiWindow *tWnd);
 int tuiInitScreen();
 //end screen
 void tuiEndScreen();
-
-
 #endif
 
