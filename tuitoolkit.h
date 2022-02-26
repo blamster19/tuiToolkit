@@ -81,7 +81,7 @@ arguments of init functions:
 tuiInitLabel(Window, Widget, posX, posY, text)
 tuiInitButton(Window, Widget, posX, posY, text)
 tuiInitCheckbox(Window, Widget, posX, posY, text)
-tuiInitList(Window, Widget, posX, posY, list, width, height)
+tuiInitList(Window, Widget, posX, posY, list, length, width, height)
 
 parameters:
 	[type] 			[name] 		[description]
@@ -90,7 +90,8 @@ parameters:
 	unsigned int 	posX 		widget x position from upper left corner measured in characters
 	unsigned int 	posY 		widget Y  position from upper left corner measured in characters
 	*char 			text 		text to be displayed
-	*char[] 		list 		list of strings; each string is one selectable option
+	*char[] 		list 		array of strings; each string is one selectable option
+	unsigned int 	length  	length of said array
 	unsigned int 	width 		widget width measured in characters
 	unsigned int 	height 		widget height measured in characters
 
@@ -208,10 +209,10 @@ typedef struct {
 void tuiInitLabel(tuiWindow *tWnd, tuiWidgetLabel *tLabl, unsigned int posX, unsigned int posY, char *label);
 void tuiInitButton(tuiWindow *tWnd, tuiWidgetButton *tButton, unsigned int posX, unsigned int posY, char *label);
 void tuiInitCheckbox(tuiWindow *tWnd, tuiWidgetCheckbox *tButton, unsigned int posX, unsigned int posY, char *label);
-void tuiInitList(tuiWindow *tWnd, tuiWidgetList *tList, int listLength, unsigned int posX, unsigned int posY, char *(*values)[], unsigned int width, unsigned int height);
+void tuiInitList(tuiWindow *tWnd, tuiWidgetList *tList, unsigned int posX, unsigned int posY, char *(*values)[], unsigned int listLength, unsigned int width, unsigned int height);
 
 //initiate window
-void tuiInitWindow(tuiWindow *tWnd, unsigned int posX, unsigned int posY, unsigned int wdt, unsigned int hgt, char *title, char decor, char palt, char set);
+void tuiInitWindow(tuiWindow *tWnd, unsigned int posX, unsigned int posY, unsigned int wdt, unsigned int hgt, char *title, char decor, char palt);
 //draw window on screen
 void tuiDrawWindow(tuiWindow *tWnd);
 //end window

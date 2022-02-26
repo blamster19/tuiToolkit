@@ -104,7 +104,7 @@ void tuiInitCheckbox(tuiWindow *tWnd, tuiWidgetCheckbox *tCheckbox, unsigned int
 	*tCheckbox = (tuiWidgetCheckbox){.posX = posX, .posY = posY, .text = label, .tWndPtr = tWnd, .highlighted = 0, .ticked = 0};
 	_appendToEnd(&tWnd -> wdgHead, tCheckbox, TYPE_CHECKBOX);
 }
-void tuiInitList(tuiWindow *tWnd, tuiWidgetList *tList, int listLength,  unsigned int posX, unsigned int posY, char *(*values)[], unsigned int width, unsigned int height){	
+void tuiInitList(tuiWindow *tWnd, tuiWidgetList *tList,  unsigned int posX, unsigned int posY, char *(*values)[], unsigned int listLength, unsigned int width, unsigned int height){	
 	*tList = (tuiWidgetList){.posX = posX, .posY = posY, .values = values,.listLength = listLength, .tWndPtr = tWnd, .selection = 0, .scroll = 0, .highlighted = 0, .width = width, .height = height, .scroll = 0};
 	_appendToEnd(&tWnd -> wdgHead, tList, TYPE_LIST);
 }
@@ -242,14 +242,14 @@ int _drawList(tuiWidgetList *tWdg){
 
 /* window */
 
-void tuiInitWindow(tuiWindow *tWnd, unsigned int posX, unsigned int posY, unsigned int wdt, unsigned int hgt, char *title, char decor, char palt, char set){
+void tuiInitWindow(tuiWindow *tWnd, unsigned int posX, unsigned int posY, unsigned int wdt, unsigned int hgt, char *title, char decor, char palt){
 	//create ncurses window
 	WINDOW *ncrsWnd = newwin(hgt, wdt, posY, posX);
 	noecho();
 	wclear(ncrsWnd);
 	//set keypad support
 	keypad(stdscr, TRUE);
-	*tWnd = (tuiWindow){.posX = posX, .posY = posY, .width = wdt, .height = hgt, .title = title, .decoration = decor, .palette = palt, .wndPtr = ncrsWnd, .extendedSet = set};
+	*tWnd = (tuiWindow){.posX = posX, .posY = posY, .width = wdt, .height = hgt, .title = title, .decoration = decor, .palette = palt, .wndPtr = ncrsWnd};
 	tWnd -> wdgHead = NULL;
 }
 #define tuiDrawWidget(wdgt) _Generic (wdgt, tuiWidgetLabel*: _drawLabel, tuiWidgetButton*: _drawButton,tuiWidgetList*: _drawList, tuiWidgetCheckbox*: _drawCheckbox, tuiWidgetList: _drawList)(wdgt)
@@ -310,8 +310,23 @@ void tuiDrawWindow(tuiWindow *tWnd){
 	}
 	wrefresh((*tWnd).wndPtr);
 }
-void tuiEndWindow(tuiWindow *tWnd){
-	endwin();
+void tuiEndWindow(tuiWindow *tWnd){	
+	if(tWnd -> wdgHead != NULL){
+		struct listNode* Ptr1;
+		struct listNode* Ptr2;
+		struct listNode* Ptr3;
+		Ptr1 = tWnd -> wdgHead;
+		Ptr2 = Ptr1 -> next;
+		while(Ptr2 != NULL){
+			Ptr3 = Ptr2;
+			//deallocate node
+			free(Ptr1);
+			Ptr1 = Ptr2;
+			Ptr2 = Ptr3 -> next;
+		}
+	}
+	delwin(tWnd -> wndPtr);
+	refresh();
 }
 
 /* screen */
